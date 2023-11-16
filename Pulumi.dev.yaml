@@ -1,0 +1,26 @@
+config:
+  aws:profile: demo
+  aws:region: us-east-1
+  myVpc:amiid: "ami-0ceae19f226a4b118"
+  myVpc:cidrBlock: "10.0.0.0/16"
+  myVpc:dbname: "assignment1"
+  myVpc:destinationCidrBlockcon: "0.0.0.0/0"
+  myVpc:eng: "mariadb"
+  myVpc:eversion: "10.6.14"
+  myVpc:iclass: "db.t2.micro"
+  myVpc:idenf: "csye6225"
+  myVpc:intGateWay: "internetGateWay"
+  myVpc:itype: "t2.micro"
+  myVpc:mpswd: "HArissh92##"
+  myVpc:privateRoute: "PrivateRouteTable"
+  myVpc:privateSubnet: "privateSubnet"
+  myVpc:publicRoute: "PublicRouteTable"
+  myVpc:publicSubnet: "publicSubnet"
+  myVpc:publickeygen: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCrJILTg2f2ZVByyUYa/x5RDvb3UpAXlSUyJ3+uo5RDKdw6xkzgIbMdCAXCJXpHgnVo1t1QlKPmiGKs5+DLZb29HpwwIlOKI1g6/qGzXXv1koEJ1c+9QgwJevHpPOlm5PPr5zU849mwNqzfAimQBRpEcHsY2+uxq8HcFP0cpOBvR7nzhI1PgjzOS+ApRO7PFEZYGksZADQejIpsGxqhFnnhMyfeyg+PeUEufGdTs48ez/2Wcs5mRkROlzuAtH5fCo24abAe/Asl2WUlOlSAzU2tg8KbvMnhYZ6eJ/FkpppiN7lI80ZNUgUGDhnkR5wfdyR4yc6R9MlGqE3LXZKCXbOKcO/Hpq1GDzWbHTZfmIB1MvovUCIHgct6CDbLDzqOwYa7L6BkwL0LYpMuo3BS7qQLzuAhWOGuJBxw+GPGZuH9xihl4zS1JBGW22XVeT9izeA7rqpNW57izZA0RgFL8bOIiObWIkquvPehIo5j7reC3Ouo062+q0/Okqi0B7McpWk= harish@Harishs-MacBook-Air.local"
+  myVpc:uname: "root"
+  myVpc:vpcName: "myVpc"
+  myVpc:domainName: "demo.harishkumarvn.me"
+  myVpc:zoneid: "Z04874672C36LRXIK4W8U"
+  myVpc:arnid: "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+  myVpc:autoscalearnid: "arn:aws:iam::aws:policy/AutoScalingFullAccess"
+
