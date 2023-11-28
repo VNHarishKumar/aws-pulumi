@@ -19,8 +19,8 @@ config:
   myVpc:publickeygen: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCrJILTg2f2ZVByyUYa/x5RDvb3UpAXlSUyJ3+uo5RDKdw6xkzgIbMdCAXCJXpHgnVo1t1QlKPmiGKs5+DLZb29HpwwIlOKI1g6/qGzXXv1koEJ1c+9QgwJevHpPOlm5PPr5zU849mwNqzfAimQBRpEcHsY2+uxq8HcFP0cpOBvR7nzhI1PgjzOS+ApRO7PFEZYGksZADQejIpsGxqhFnnhMyfeyg+PeUEufGdTs48ez/2Wcs5mRkROlzuAtH5fCo24abAe/Asl2WUlOlSAzU2tg8KbvMnhYZ6eJ/FkpppiN7lI80ZNUgUGDhnkR5wfdyR4yc6R9MlGqE3LXZKCXbOKcO/Hpq1GDzWbHTZfmIB1MvovUCIHgct6CDbLDzqOwYa7L6BkwL0LYpMuo3BS7qQLzuAhWOGuJBxw+GPGZuH9xihl4zS1JBGW22XVeT9izeA7rqpNW57izZA0RgFL8bOIiObWIkquvPehIo5j7reC3Ouo062+q0/Okqi0B7McpWk= harish@Harishs-MacBook-Air.local"
   myVpc:uname: "root"
   myVpc:vpcName: "myVpc"
-  myVpc:domainName: "demo.harishkumarvn.me"
-  myVpc:zoneid: "Z04874672C36LRXIK4W8U"
+  myVpc:domainName: "Add your domain name"
+  myVpc:zoneid: "Add your zone id"
   myVpc:arnid: "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   myVpc:autoscalearnid: "arn:aws:iam::aws:policy/AutoScalingFullAccess"
 
