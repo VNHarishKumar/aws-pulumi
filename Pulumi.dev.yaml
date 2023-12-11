@@ -26,7 +26,7 @@ config:
   myVpc:vpcName: "myVpc"
   myVpc:zoneid: "your Zoneid"
   myVpc:snsarn: "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
-  myVpc:lambdaFunctionCodePathcon: "/Users/harish/Documents/MIS_NEU/Cloud/serverless"
+  myVpc:lambdaFunctionCodePathcon: "Lambda function path"
   myVpc:lambdaRolePolicyconfig: "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   myVpc:fileHandler: "nodejs18.x"
   myVpc:fileName: "index.handler"
