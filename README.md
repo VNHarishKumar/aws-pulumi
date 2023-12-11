@@ -14,6 +14,7 @@ To run pulumi
 - Check in console whether the VPC is created or not
 - pulumi up,to update the existing code
 - To destroy created resources , give pulumi destroy
+- Lambda function code available in serverless repository url: https://github.com/VNHarishKumar/serverless
 
 Certificate Upload command
 
