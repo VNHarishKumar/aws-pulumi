@@ -1,16 +1,12 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import { Ipv4 } from "@pulumi/aws/alb";
-
+import * as gcp from "@pulumi/gcp";
+import * as cdk from 'aws-cdk-lib';
 
 const config = new pulumi.Config("myVpc");
 
 const cidrBlock = config.require("cidrBlock");
-
-
-// const cidrBlock = config.require("cidrBlock");
-
-// const [baseFirst, baseSecond] = cidrBlock.split('.').slice(0, 2);
 
 const vpcName = config.require("vpcName");
 const publicSub = config.require("publicSubnet");
@@ -33,9 +29,24 @@ const instanceType = config.require("itype");
 const keyPairName = new aws.ec2.KeyPair("my-key-pair", {
     publicKey: publicKeyGen,
 });
+const cloudWatchArn = config.require("arnid");
+const autoScalingArn = config.require("autoscalearnid");
+const snsArn = config.require("snsarn");
+const lambdaRolePolicyarn = config.require("lambdaRolePolicyconfig");
+const lambdaFunctionCodePathconfig = config.require("lambdaFunctionCodePathcon");
+const filehandler = config.require("fileHandler");
+const filename = config.require("fileName");
+const accessKeyId = config.require("accessKeyIdEnv");
+const secretAccessKey = config.require("secretAccessKeyEnv");
+const regione = config.require("regionEnv");
+const sourceemail = config.require("sourceEmail");
+const GcpBucketNamepulumi = config.require("BucketName");
+const gcpProject = config.require("GcpProject");
+const GcpProjectaccid = config.require("GcpProjectAccid");
+const BucketLocation = config.require("bucketLocation");
+const certificateArn = config.require("SSLC");
 
-
-// Base CIDR block
+// Base CIDR blocke()
 const baseCidrBlock = cidrBlock;
 
 // Function to calculate the new subnet mask
@@ -123,12 +134,7 @@ randomAZs.apply(azList => {
 
        
     }
-    // console.log(publicSubnets);
-// const amiId = config.require("amiid");
-// const instanceType = 't2.micro';
-// const keyPairName = new aws.ec2.KeyPair("my-key-pair", {
-//     publicKey: publicKeyGen,
-// });
+   
 
 
 // Create a security group for the ALB
@@ -152,14 +158,9 @@ const albSecurityGroup: aws.ec2.SecurityGroup = new aws.ec2.SecurityGroup("albSe
         fromPort: 0,
         toPort: 0,
         protocol: "-1",
-        cidrBlocks: ["0.0.0.0/0"],
+        // cidrBlocks: ["0.0.0.0/0"],
+        cidrBlocks: [destinationCidrBlockconfig],
     }],
-});
-
-
-const rdsSecurityGroup = new aws.ec2.SecurityGroup("database-security-group", {
-    vpcId: vpc.id,
-    description: "RDS Security Group",
 });
 
 
@@ -180,21 +181,17 @@ const securityGroup = new aws.ec2.SecurityGroup("mySecurityGroup", {
             protocol: "tcp",
             fromPort: 9000, 
             toPort: 9000,   
-            // cidrBlocks: ["0.0.0.0/0"], // Allow your custom application port from anywhere
-            // Remove if didn't work
-            // cidrBlocks: [destinationCidrBlockconfig],
             securityGroups: [albSecurityGroup.id],
         },
         
     ],
     egress: [
         {
-          fromPort: 3306,
-          toPort: 3306,
-          protocol: "tcp",
+          fromPort: 0,
+          toPort: 0,
+          protocol: "-1",
         //   cidrBlocks: ["0.0.0.0/0"],
           cidrBlocks: [destinationCidrBlockconfig],
-        // securityGroups: [rdsSecurityGroup.id,albSecurityGroup.id],
         },
       ],
       tags: {
@@ -226,22 +223,20 @@ const rdsParameterGroup = new aws.rds.ParameterGroup("my-rds-parameter-group", {
 });
 
 // Create an RDS security group
-// const rdsSecurityGroup = new aws.ec2.SecurityGroup("database-security-group", {
-//     vpcId: vpc.id,
-//     description: "RDS Security Group",
-// });
+const rdsSecurityGroup = new aws.ec2.SecurityGroup("database-security-group", {
+    vpcId: vpc.id,
+    description: "RDS Security Group",
+});
 
 // Create an inbound security group rule for RDS
 const rdsInboundSecurityGroupRule = new aws.ec2.SecurityGroupRule("rds-inbound-rule", {
     type: "ingress",
     fromPort: 3306, // MySQL port
     toPort: 3306,
-    // fromPort: 0, // MySQL port
-    // toPort: 65535,
+    
     protocol: "tcp",
     securityGroupId: rdsSecurityGroup.id, // Your EC2 instance's security group
-    // securityGroupId: securityGroup.id,
-    // sourceSecurityGroupId: rdsSecurityGroup.id, // Your RDS security group
+  
     sourceSecurityGroupId:securityGroup.id ,  // provide the application security id
  });
 
@@ -284,12 +279,7 @@ const rdsInstance = new aws.rds.Instance("my-rds-instance", {
   
 });
 
-// console.log("adress of rds instance",rdsInstance.address);
-// console.log("address of Endpoint",rdsInstance.endpoint);
-// Depend on the RDS instance for the EC2 instance
-// ec2Instance.transform(() => {
-//     return rdsInstance.id;
-// });
+
 // ------------------------------------------------ DB SECURITY GROUP END----------------------------------------
 // ---------------
 const ec2Role = new aws.iam.Role('ec2Role', {
@@ -300,13 +290,12 @@ const ec2Role = new aws.iam.Role('ec2Role', {
             Effect: "Allow",
             Principal: {
                 Service: "ec2.amazonaws.com"
-            }
+            },
         }]
     })
 });
 
-const cloudWatchArn = config.require("arnid");
-const autoScalingArn = config.require("autoscalearnid");
+
 
 // Attach CloudWatch policy
 const cloudWatchPolicyAttachment = aws.iam.getPolicy({
@@ -318,43 +307,231 @@ const cloudWatchPolicyAttachment = aws.iam.getPolicy({
     });
 });
 
-// Attach Auto Scaling policy
-// const autoScalingPolicyAttachment = aws.iam.getPolicy({
-//     arn: autoScalingArn,
-// }).then(policy => {
-//     return new aws.iam.PolicyAttachment('autoScalingPolicyAttachment', {
-//         policyArn: policy.arn,
-//         roles: [ec2Role.name],
-//     });
-// });
+// Attach SNS policy
+const SnsPolicyAttachment = aws.iam.getPolicy({
+    arn: snsArn,
+}).then(policy => {
+    return new aws.iam.PolicyAttachment('autoScalingPolicyAttachment', {
+        policyArn: policy.arn,
+        roles: [ec2Role.name],
+    });
+});
+
+
 
 const ec2InstanceProfile = new aws.iam.InstanceProfile('ec2InstanceProfile', {
-    name: 'YourInstanceProfileName', // Replace with a unique name
+    name: 'myInstanceprofile', // Replace with a unique name
     role: ec2Role.name,
 });
 
-// -----------------
 
+
+// ------------------------------------- Lambda Function Start-------------------------------------------
+
+
+// // --------------------------GCP Bucket , ------------------------------------------------------
+
+const bucket = new gcp.storage.Bucket("submission-bucket-002766063", {
+    // name: "submission-bucket-002766063", // replace with the actual bucket name
+    name: GcpBucketNamepulumi,
+    location: BucketLocation,    // replace with your preferred bucket location
+    storageClass: "STANDARD",
+    project: gcpProject, 
+    forceDestroy: true,
+});
+
+const serviceAccount = new gcp.serviceaccount.Account("my-service-account-002766063", {
+    accountId: GcpProjectaccid,
+    displayName: "My Service Account",
+    project: gcpProject, // replace with your project id
+});
+
+// let sa = "harisshkumar10@gmail.com"; 
+
+let saKey = new gcp.serviceaccount.Key("my-key", {
+    // serviceAccountId: sa,
+    serviceAccountId: serviceAccount.accountId,
+    publicKeyType: "TYPE_X509_PEM_FILE",
+  
+});
+
+// Assign the roles/storage.objectCreator role to the service account for the bucket
+const bucketIAMBinding = new gcp.storage.BucketIAMBinding("bucketIAMBinding", {
+    bucket: bucket.name,
+    members: [serviceAccount.email.apply((e)=>`serviceAccount:${e}`)],
+    role: "roles/storage.objectCreator",
+});
+
+
+// ---------------------------Creating SNS-----------------------------------
+const snsTopic = new aws.sns.Topic("Submissions");
+
+// Create an IAM role for Lambda execution
+const lambdaRole = new aws.iam.Role("lambdaRole", {
+    assumeRolePolicy: pulumi.output({
+        Version: "2012-10-17",
+        Statement: [{
+            Action: "sts:AssumeRole",
+            Effect: "Allow",
+            Principal: {
+                Service: "lambda.amazonaws.com",
+            },
+        }],
+    }).apply(JSON.stringify),
+});
+
+// SES POLICY FOR LAMBDA
+// Create an SES policy
+const sesPolicy = new aws.iam.Policy("sesPolicy", {
+    name: "SES_Policy",
+    description: "Policy for SES permissions",
+    policy: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [{
+            Effect: "Allow",
+            Action: [
+                "ses:SendEmail",
+                "ses:SendRawEmail",
+                "ses:SendTemplatedEmail",
+                "ses:SendBulkTemplatedEmail",
+                "ses:SendCustomVerificationEmail",
+                "ses:SendEmailVerification",
+                "ses:SendRawEmail",
+                "ses:SendTemplatedEmail",
+                "ses:VerifyEmailIdentity",
+                "ses:VerifyEmailAddress",
+            ],
+            Resource: "*",
+        },
+    ],
+}),
+});
+
+
+const dynampolicy = new aws.iam.Policy("dynampolicy", {
+    name: "dynampolicy",
+    description: "Policy for Dynamodb permissions",
+    policy: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [{
+            Effect: "Allow",
+            Action: [
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:BatchWriteItem",
+            ],
+            Resource: "*",
+        },
+    ],
+}),
+});
+
+// ---------------------- Dynamo DB ------------------------------------
+const dynamoTable = new aws.dynamodb.Table("EmailTrackingTable", {
+    attributes: [
+      { name: "EmailId", type: "S" },
+      { name: "Timestamp", type: "S" },
+      { name: "Status", type: "S" }, // New attribute
+      // Add additional attributes as needed
+    ],
+    hashKey: "EmailId",
+    rangeKey: "Timestamp",
+    billingMode: "PAY_PER_REQUEST",
+    
+    globalSecondaryIndexes: [
+        {
+          name: "StatusIndex",
+          hashKey: "Status",
+          projectionType: "ALL",
+        },
+      ],
+    });
+  
+
+
+// // Attach a policy to the role that grants permission to write logs to CloudWatch
+const lambdaRolePolicy = new aws.iam.RolePolicyAttachment("lambdaRolePolicy", {
+    role: lambdaRole.name,
+    policyArn: lambdaRolePolicyarn,
+    
+});
+const lambdaRolePolicySES = new aws.iam.RolePolicyAttachment("lambdaRolePolicySES", {
+    role: lambdaRole.name,
+    policyArn: sesPolicy.arn,
+    
+});
+const Dynamodbaccesspolicy = new aws.iam.RolePolicyAttachment("Dynamodbaccesspolicy", {
+    role: lambdaRole.name,
+    // policyArn: "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess",
+    policyArn: dynampolicy.arn,
+   
+    
+});
+
+// // Specify the path or URL to the Lambda function code in your other repository
+// const lambdaFunctionCodePath = "/Users/harish/Documents/MIS_NEU/Cloud/serverless/index.js";
+const lambdaFunctionCodePath = lambdaFunctionCodePathconfig;
+
+// Create an AWS Lambda function
+const lambdaFunction = new aws.lambda.Function("myLambdaFunction", {
+   
+code: new pulumi.asset.AssetArchive({
+    ".": new pulumi.asset.FileArchive(lambdaFunctionCodePath),
+}),
+  role: lambdaRole.arn,
+  handler: filename,
+  runtime: filehandler,
+  timeout: 5,
+  environment: {
+        variables: {
+            saKey: saKey.privateKey,
+            project_id: serviceAccount.project,
+            acc_email: serviceAccount.email,
+            DYNAMO_TABLE_NAME: dynamoTable.name,
+            accessKeyId: accessKeyId,
+            secretAccessKey: secretAccessKey,
+            region: regione,
+            sourceEmail: sourceemail,
+            gcpBucketName:bucket.name,
+
+            // acc_email: "harisshkumar10@gmail.com",
+
+        },
+    },
+    
+});
+
+
+// // Subscribe the Lambda function to the SNS topic
+const snsSubscription = new aws.sns.TopicSubscription("mySnsSubscription", {
+    topic: snsTopic.arn,
+    protocol: "lambda",
+    endpoint: lambdaFunction.arn,
+   
+});
+
+
+
+const lambdaPermission = new aws.lambda.Permission("function-with-sns", {
+    action: "lambda:InvokeFunction",
+    function: lambdaFunction.name,
+    // function: 'SERVERLESS',
+    principal: "sns.amazonaws.com",
+    sourceArn: snsTopic.arn,
+    
+  });
+
+
+
+// ------------------------------------- Lambda Function End-------------------------------------------
 
 const dialect = 'mysql';
 
-console.log("Instance value",rdsInstance.address);
-// Create a launch configuration for the auto scaling group
-// const userDataScript = `#!/bin/bash
-//     sudo echo "MYSQL_HOST=${rdsInstance.address}" | sudo tee /opt/web-app/.env
-//     sudo echo "MYSQL_USER='${rdsInstance.username}'" | sudo tee -a /opt/web-app/.env
-//     sudo echo "MYSQL_PASSWORD='${rdsInstance.password}'" | sudo tee -a /opt/web-app/.env
-//     sudo echo "MYSQL_DATABASE='${rdsInstance.dbName}'" | sudo tee -a /opt/web-app/.env
-//     sudo echo "MYSQL_DIALECT='${dialect}'" | sudo tee -a /opt/web-app/.env
-//     echo 'Hello from the new EC2 instance';
-//     sudo /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
-//     -a fetch-config \
-//     -m ec2 \
-//     -c file:/opt/cloudwatch-config.json \
-//     -s
-// `;
 
-// const encodedUserData = pulumi.output(userDataScript).apply(data => Buffer.from(data).toString("base64"));
+console.log("Instance value",rdsInstance.address);
+
+
 
 const userDataScript = pulumi.interpolate`#!/bin/bash
     sudo echo "MYSQL_HOST=${rdsInstance.address}" | sudo tee /opt/web-app/.env
@@ -362,6 +539,8 @@ const userDataScript = pulumi.interpolate`#!/bin/bash
     sudo echo "MYSQL_PASSWORD='${rdsInstance.password}'" | sudo tee -a /opt/web-app/.env
     sudo echo "MYSQL_DATABASE='${rdsInstance.dbName}'" | sudo tee -a /opt/web-app/.env
     sudo echo "MYSQL_DIALECT='${dialect}'" | sudo tee -a /opt/web-app/.env
+    sudo echo "TOPIC_ARN='${snsTopic.arn}'" | sudo tee -a /opt/web-app/.env
+    sudo echo "REGION='${regione}'" | sudo tee -a /opt/web-app/.env
     echo 'Hello from the new EC2 instance';
     sudo /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
     -a fetch-config \
@@ -375,8 +554,6 @@ const launchTemplate: aws.ec2.LaunchTemplate = new aws.ec2.LaunchTemplate("myLau
     imageId: amiId,
     instanceType: instanceType,
     keyName: keyPairName.keyName,
-    // securityGroupNames: [securityGroup.name],
-    // vpcSecurityGroupIds:[securityGroup.id],
     
     blockDeviceMappings: [
         {
@@ -409,26 +586,6 @@ const launchTemplate: aws.ec2.LaunchTemplate = new aws.ec2.LaunchTemplate("myLau
 },{
     dependsOn:[rdsInstance,ec2InstanceProfile]
   });
-
-
-
-// const ec2Instance: aws.ec2.Instance  = new aws.ec2.Instance('myEC2Instance', {
-//     ami: amiId,
-//     instanceType: instanceType,
-//     subnetId: publicSubnets[0].id,
-//     keyName: keyPairName.keyName, 
-//     securityGroups: [securityGroup.id], // Associate the security group
-//     availabilityZone:azList[0],
-//     iamInstanceProfile: ec2InstanceProfile.name, 
-//     tags: {
-//         Name: 'MyEC2Instance',
-//     },
-// },{
-//     dependsOn: [vpc,...privateSubnets,...publicSubnets],
-// });
-
-
-
 
 
 // Create an ALB
@@ -467,29 +624,19 @@ const targetGroup: aws.lb.TargetGroup = new aws.lb.TargetGroup("myTargetGroup", 
 
 
 // Create an ALB listener
+
 const albListener: aws.lb.Listener = new aws.lb.Listener("myALBListener", {
     loadBalancerArn: alb.arn,
-    port: 80,
-    protocol: "HTTP",
+    port: 443,
+    protocol: "HTTPS",
     defaultActions: [{
         type: "forward",
         targetGroupArn: targetGroup.arn,
     }],
+    certificateArn: certificateArn,
 });
 
-// Attach the target group to the ALB listener
-// const targetGroupAttachment: aws.lb.ListenerRule = new aws.lb.ListenerRule("myTargetGroupAttachment", {
-//     listenerArn: albListener.arn,
-//     actions: [{
-//         type: "forward",
-//         targetGroupArn: targetGroup.arn,
-//     }],
-//     conditions: [{
-//         pathPattern: {
-//             values: ["/"],
-//         },
-//     }],
-// });
+
 
 
 // console.log("My public subnets before auto sale:",publicSubnets);
@@ -603,12 +750,6 @@ const albRecord: aws.route53.Record = new aws.route53.Record("myAlbRecord", {
 });
 
 
-// console.log(publicSubnets);
-
-
-//     }
-// });
-
 
 const internetGateway = new aws.ec2.InternetGateway(intGateWay, {
     vpcId: vpc.id,
@@ -655,4 +796,3 @@ randomAZs.apply(azList => {
 });
 
 
-// ?changed new db name÷ ÷
